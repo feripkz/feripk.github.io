@@ -1,0 +1,279 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circo Digital OS - Consola Retro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="language-switcher" aria-label="Selector de idioma">
+    <button class="lang-btn active" type="button" data-lang="es" title="Español">ES</button>
+    <button class="lang-btn" type="button" data-lang="en" title="English">EN</button>
+  </div>
+
+  <div class="screen boot-screen" id="bootScreen">
+    <div class="boot-shell">
+      <div class="boot-topline">
+        <span>CIRCUSBIOS.1A10 24/05/2026</span>
+        <span>CPU: Ryzen Digital-Core 12</span>
+      </div>
+      <div class="boot-lines" id="bootLines"></div>
+      <div class="boot-status-bar">
+        <span id="bootStatus">Ejecutando diagnóstico de hardware...</span>
+        <span class="boot-progress-bar"><span class="boot-progress" id="bootProgress"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen login-screen hidden" id="loginScreen">
+    <div class="login-panel">
+      <div class="login-brand" data-i18n="loginBrand">CIRCO DIGITAL<br>PROGRAMA DE ACCESO</div>
+      <div class="login-console">
+        <div class="login-line login-detail"><span data-i18n="enterUser">INGRESE USUARIO</span> ? <span id="usernameInput"></span></div>
+        <div class="login-line login-detail"><span data-i18n="enterPass">INGRESE CLAVE</span> ? <span id="passwordInput"></span></div>
+        <div class="login-warning" data-i18n="loginWarning">*** USE MAYUSCULAS SOLAMENTE ***</div>
+        <div class="login-line login-status" id="loginStatus">ESPERANDO AUTOLOGIN...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen desktop hidden" id="desktop">
+    <div class="wallpaper"></div>
+    <div class="desktop-noise"></div>
+    <div class="taskbar">
+      <button class="start-button" id="startButton" type="button" data-i18n="systemButton">SISTEMA</button>
+      <div class="taskbar-caption" data-i18n="taskbarCaption">circo-digital-os: escritorio tty7</div>
+      <div class="clock" id="taskTime">00:00:00</div>
+    </div>
+
+    <div class="system-menu hidden" id="systemMenu">
+      <div class="system-menu-title">Circo Digital OS</div>
+      <button type="button" data-open-app="consoleWindow" data-i18n="menuTerminal">Terminal</button>
+      <button type="button" data-open-app="folderWindow" data-i18n="menuFiles">Explorador de archivos</button>
+      <button type="button" data-open-app="statsWindow" data-i18n="menuStats">Monitor de abstraccion</button>
+      <button type="button" data-open-app="castWindow" data-i18n="menuCast">Directorio del circo</button>
+      <button type="button" data-open-app="exitWindow" data-i18n="menuExit">Buscador de salida</button>
+      <button type="button" data-open-app="simWindow" data-i18n="menuSim">Simulador de actos</button>
+      <button type="button" data-open-app="memoryWindow" data-i18n="menuMemory">Laboratorio de recuerdos</button>
+      <button type="button" id="menuReboot" data-i18n="menuReboot">Reiniciar</button>
+    </div>
+
+    <div class="desktop-icons">
+      <button class="desktop-icon" id="folderIcon" type="button">
+        <div class="icon-art folder-art"></div>
+        <div class="icon-label" data-i18n="filesIcon">archivos</div>
+      </button>
+      <button class="desktop-icon" id="terminalIcon" type="button">
+        <div class="icon-art">&gt;_</div>
+        <div class="icon-label" data-i18n="terminalIcon">terminal</div>
+      </button>
+      <button class="desktop-icon" id="statsIcon" type="button">
+        <div class="icon-art meter-art">%</div>
+        <div class="icon-label" data-i18n="statsIcon">estadisticas</div>
+      </button>
+      <button class="desktop-icon" id="castIcon" type="button">
+        <div class="icon-art cast-art">◎</div>
+        <div class="icon-label" data-i18n="castIcon">personajes</div>
+      </button>
+      <button class="desktop-icon" id="exitIcon" type="button">
+        <div class="icon-art exit-art">?</div>
+        <div class="icon-label" data-i18n="exitIcon">salida</div>
+      </button>
+      <button class="desktop-icon" id="simIcon" type="button">
+        <div class="icon-art sim-art">▶</div>
+        <div class="icon-label" data-i18n="simIcon">actos</div>
+      </button>
+      <button class="desktop-icon" id="memoryIcon" type="button">
+        <div class="icon-art memory-art">▣</div>
+        <div class="icon-label" data-i18n="memoryIcon">recuerdos</div>
+      </button>
+    </div>
+
+    <div class="window folder-window hidden" id="folderWindow">
+      <div class="window-header">
+        <span data-i18n="folderTitle">/home/operador/archivos</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeFolder" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div class="file-explorer">
+          <aside class="file-sidebar">
+            <button type="button" class="folder-node active">/home/operador</button>
+            <button type="button" class="folder-node">/programas</button>
+            <button type="button" class="folder-node">/var/log/circo</button>
+            <button type="button" class="folder-node">/mnt/void</button>
+          </aside>
+          <section class="file-main">
+            <div class="file-path">/home/operador/archivos</div>
+            <div class="file-row file-head">
+              <span>Nombre</span><span>Tipo</span><span>Tamano</span>
+            </div>
+            <button class="file-row" data-image="photo1.svg" type="button">
+              <span>acto_01_entrada.svg</span><span>imagen</span><span>1.2 KB</span>
+            </button>
+            <button class="file-row" data-image="photo2.svg" type="button">
+              <span>tunel_espejos.svg</span><span>imagen</span><span>1.7 KB</span>
+            </button>
+            <button class="file-row" data-image="photo3.svg" type="button">
+              <span>archivo_caine.svg</span><span>imagen</span><span>1.9 KB</span>
+            </button>
+            <button class="file-row" type="button">
+              <span>last_act_protocol.sys</span><span>sistema</span><span>9.0 MB</span>
+            </button>
+            <button class="file-row" type="button">
+              <span>exit_door.tmp</span><span>temporal</span><span>0 B</span>
+            </button>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="window console-window hidden" id="consoleWindow">
+      <div class="window-header">
+        <span data-i18n="terminalTitle">Terminal - operador@circo-linux:~</span>
+        <div class="window-controls">
+          <button class="control-btn" id="minimizeConsole" type="button" title="Minimizar">–</button>
+          <button class="control-btn" id="closeConsole" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body console-body">
+        <div class="console-content" id="consoleContent"></div>
+        <div class="console-input-row">
+          <span class="prompt">operador@circo-linux:~$</span>
+          <input type="text" id="consoleInput" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+    </div>
+
+    <div class="window stats-window hidden" id="statsWindow">
+      <div class="window-header">
+        <span data-i18n="statsTitle">Monitor de abstraccion</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeStats" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body stats-body">
+        <div class="stat-row">
+          <span data-i18n="statSanity">Estabilidad mental</span>
+          <strong id="sanityValue">72%</strong>
+          <span class="stat-track"><span id="sanityBar"></span></span>
+        </div>
+        <div class="stat-row">
+          <span data-i18n="statExit">Probabilidad de salida</span>
+          <strong id="exitValue">0.04%</strong>
+          <span class="stat-track"><span id="exitBar"></span></span>
+        </div>
+        <div class="stat-row">
+          <span data-i18n="statGlitch">Presion glitch</span>
+          <strong id="glitchValue">18%</strong>
+          <span class="stat-track"><span id="glitchBar"></span></span>
+        </div>
+        <div class="stat-row">
+          <span data-i18n="statFun">Diversion obligatoria</span>
+          <strong id="funValue">91%</strong>
+          <span class="stat-track"><span id="funBar"></span></span>
+        </div>
+        <button class="program-btn" id="refreshStats" type="button" data-i18n="refreshStats">recalcular</button>
+      </div>
+    </div>
+
+    <div class="window cast-window hidden" id="castWindow">
+      <div class="window-header">
+        <span data-i18n="castTitle">Directorio del circo</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeCast" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body cast-body">
+        <div class="cast-list" id="castList"></div>
+        <div class="cast-detail" id="castDetail"></div>
+      </div>
+    </div>
+
+    <div class="window exit-window hidden" id="exitWindow">
+      <div class="window-header">
+        <span data-i18n="exitTitle">Buscador de salida</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeExit" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body exit-body">
+        <div class="exit-radar" id="exitRadar">
+          <span></span>
+        </div>
+        <div class="exit-log" id="exitLog">Sistema listo.</div>
+        <button class="program-btn" id="scanExit" type="button" data-i18n="scanExit">escanear salida</button>
+      </div>
+    </div>
+
+    <div class="window sim-window hidden" id="simWindow">
+      <div class="window-header">
+        <span data-i18n="simTitle">Simulador de actos</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeSim" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body sim-body">
+        <div class="sim-stage" id="simStage">Seleccione un acto.</div>
+        <div class="sim-actions">
+          <button class="program-btn" type="button" data-act="office" data-i18n="actOffice">oficina C&A</button>
+          <button class="program-btn" type="button" data-act="void" data-i18n="actVoid">vacio</button>
+          <button class="program-btn" type="button" data-act="circus" data-i18n="actCircus">carpa</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="window memory-window hidden" id="memoryWindow">
+      <div class="window-header">
+        <span data-i18n="memoryTitle">Laboratorio de recuerdos</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeMemory" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body memory-body">
+        <div class="memory-grid" id="memoryGrid"></div>
+        <div class="memory-output" id="memoryOutput">Fragmentos bloqueados.</div>
+      </div>
+    </div>
+
+    <div class="window image-viewer hidden" id="imageViewer">
+      <div class="window-header">
+        <span data-i18n="viewerTitle">Visor de imágenes</span>
+        <div class="window-controls">
+          <button class="control-btn" id="closeViewer" type="button" title="Cerrar">×</button>
+        </div>
+      </div>
+      <div class="window-body viewer-body">
+        <img id="viewerImage" src="" alt="Vista previa de imagen" />
+        <div class="viewer-caption" id="viewerCaption"></div>
+      </div>
+    </div>
+
+    <div class="caine-face hidden" id="caineFace">
+      <img src="images/caine_face.svg" alt="CAINE FACE" />
+    </div>
+    <div class="caine-delete-overlay hidden" id="caineDeleteOverlay" aria-hidden="true">
+      <div class="caine-delete-popups" id="caineDeletePopups"></div>
+      <div class="caine-delete-panel">
+        <div class="caine-delete-face" id="caineDeleteFace">
+          <img src="images/caine_face.svg" alt="CAINE DELETE FACE" />
+        </div>
+        <div class="caine-delete-title">CAINE_CORE_DELETE</div>
+        <div class="caine-delete-subtitle">Eliminando al anfitrion del sistema</div>
+        <div class="caine-delete-status" id="caineDeleteStatus">Esperando confirmacion...</div>
+        <div class="caine-delete-bar"><span id="caineDeleteProgress"></span></div>
+        <div class="caine-delete-log" id="caineDeleteLog"></div>
+      </div>
+    </div>
+    <div class="glitch-overlay hidden" id="glitchOverlay"></div>
+    <div class="ghost-layer" id="ghostLayer"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
